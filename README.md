@@ -1,2 +1,1 @@
-# visualization
-Visualization of a genetic algorithm
+# Visualization of a genetic algorithm
