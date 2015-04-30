@@ -5,6 +5,7 @@ d3.flowchart = function() {
       size = [1, 1],
       deltax = 0,
       dy = 10,
+      sortType = "values" ,
       nodes = [],
       links = [];
 
@@ -30,6 +31,14 @@ d3.flowchart = function() {
   flowchart.deltax = function(_) {
     if (!arguments.length) return deltax;
     deltax = _;
+    return flowchart;
+  }
+
+  flowchart.sortType = function(_) {
+    if(!arguments.length) return sortType;
+    sortType = _;
+    computeNodeLinks();
+    computeNodePositions();
     return flowchart;
   }
 
@@ -88,6 +97,8 @@ d3.flowchart = function() {
       .sortValues( function(d1,d2) { return d1.value > d2.value; } )
       .entries( nodes );
 
+    console.log( sortType );
+
     var n = nested_nodes.length;
     deltax = ( size[0] - n * nodeWidth - (n-1) * 2 * nodePadding[0] ) / (n-1);
     for( var i=0 ; i<n ; ++i )
@@ -96,8 +107,12 @@ d3.flowchart = function() {
       {
         var node = nested_nodes[i].values[j];
         node.x = i * ( nodeWidth + 2 * nodePadding[0] + deltax );
-        // node.y = dy + j * ( dy + nodePadding[1] );
-        node.y = ( node.value ) * size[1];
+        if( ( sortType == "sorted" ) || ( sortType == "unsorted" ) ) {
+          node.y = dy + j * ( dy + nodePadding[1] );
+        }
+        else {
+          node.y = ( node.value ) * size[1];
+        }
         node.dx = nodeWidth;
         node.dy = dy;
       }

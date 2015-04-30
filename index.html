@@ -4,7 +4,7 @@
     <head>
   
         <meta charset="utf-8">
-        <title>d3.js trial</title>
+        <title>Visualization of a genetic algorithm</title>
         <link rel="stylesheet" href="style.css">
         <style>
 
@@ -33,7 +33,7 @@
             }
 
             .link:hover {
-                stroke-opacity : .5;
+                stroke-opacity : .9;
             }
 
             .link-strong:hover {
@@ -51,9 +51,17 @@
                 stroke-opacity : .2;
             }
 
+            .noborder {
+                border : 0px;
+            }
+
             #evolution {
-                width : 1000px;
-                height : 600px;
+                width : 1800px;
+                height : 800px;
+            }
+
+            #sorttype {
+                width : 1800px;
             }
 
         </style>
@@ -63,7 +71,7 @@
     <body>
 
         <header>
-            <aside>April 8, 2015</aside>
+            <aside>April 30, 2015</aside>
             <p>Karsten Ahnert</p>
         </header>
 
@@ -72,11 +80,29 @@
             <h1>Visualization of a genetic algorithm!</h1>
 
             <p id="evolution" class="border"></p>
-
+            
+            <div id="sorttype" class="border">
+                <div class="noborder">
+                    Sort type:
+                    <div class="noborder">
+                        <input type="radio" id="unsorted" name="SortType" value="unsorted" checked="true"> <label for="unsorted">Unsorted</label> <br>
+                        <input type="radio" id="sorted" name="SortType" value="sorted"> <label for="sorted">Sorted</label> <br> 
+                        <input type="radio" id="values" name="SortType" value="value"> <label for="values">Values</label>
+                    </div>
+                </div>
+                <div class="noborder">
+                    Color type:
+                    <div class="noborder">
+                        <input type="radio" id="fitness" name="ColorTyoe" value="fitness" checked="true"><label for="fitness">Fitness</label><br>
+                        <input type="radio" id="size" name="ColorTyoe" value="size" ><label for="size">Size</label><br>
+                        <input type="radio" id="height" name="ColorTyoe" value="height" ><label for="height">Height</label><br>
+                    </div>
+                </div>
+             </div>
         </main>
 
         <footer>
-            <aside>April 8, 2015</aside>
+            <aside>April 30, 2015</aside>
             <p>Karsten Ahnert</p>
         </footer>
   
@@ -149,22 +175,30 @@
                 .data( data.nodes )
                 .enter().append( "g" )
                     .attr( "class" , "node" )
-                    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                    .attr("transform" , function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
             // create node color range
             var node_color = d3.scale.linear()
                 .domain([1.0 , 0.7 , 0.0 ])
                 .range( ["red", "white", "green"] );
+
+            var node_color_size = d3.scale.linear()
+                .domain( [ 1 , 10 , 100 ] )
+                .range( [ "green" , "white" , "red" ] );
             
             // append a rect to each node
-            node.append( "rect" )
+            var rect = node.append( "rect" )
                 .attr( "height" , function( d ) { return d.dy; } )
                 .attr( "width" , flowchart.nodeWidth() )
-                .style( "fill" , function( d ) { return node_color( d.value ); } )
+                .style( "fill" , function( d ) { return node_color_size( d.size ); } )
+                // .style( "fill" , function( d ) { return node_color( d.value ); } )
+                .on( "mouseover" , mouseover )
+                .on( "mouseout" , mouseout )
                 .append( "title" )
                     .text( function( d ) { return format( d.value ); } );
 
             // create link properties
+            // elite, mutation, crossover, reproduce
             var link_color = { "-1" : "red" , "0" : "blue" , "1" : "green" , "2" : "yellow" };
 
             // create links
@@ -176,9 +210,33 @@
                     .style( "stroke-width" , function( d ) { return Math.max( 1 , d.dy ); } )
                     .style( "stroke" , function( d ) { return link_color[ d.op ]; } )
                     // .sort(function(a, b) { return b.dy - a.dy; });
-
-
         });
+
+        function mouse( e ) {
+            return [ e.pageX - rx, e.pageY - ry ];
+        }
+
+        function mouseover( d ) {
+            console.log( "mouseover" );
+            // svg.selectAll("path.link.target-" + d.key)
+            //     .classed("target", true)
+            //     .each(updateNodes("source", true));
+
+            // svg.selectAll("path.link.source-" + d.key)
+            //     .classed("source", true)
+            //     .each(updateNodes("target", true));
+        }
+
+        function mouseout( d ) {
+            console.log( "mouseout" );
+            // svg.selectAll("path.link.source-" + d.key)
+            //     .classed("source", false)
+            //     .each(updateNodes("target", false));
+
+            // svg.selectAll("path.link.target-" + d.key)
+            //     .classed("target", false)
+            //     .each(updateNodes("source", false));
+        }
 
     </script>
 
