@@ -1,167 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 
-	<head>
+    <head>
   
-    	<meta charset="utf-8">
-    	<title>d3.js trial</title>
-    	<link rel="stylesheet" href="style.css">
-    	<script src="../third_party/d3/d3.min.js" charset="utf-8"></script>
-    	<script src="script.js"></script>
-    	<script src="../third_party/sankey.js"></script>
-	   	<style>
+        <meta charset="utf-8">
+        <title>d3.js trial</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
 
-			#sankey {
-	  			height: 1000px;
-			}
+            .node rect {
+                /* cursor : move; */
+                /* fill-opacity : .9; */
+                /* shape-rendering : crispEdges; */
+                stroke-width : 0;
+            }
 
-			.node rect {
-				cursor: move;
-				fill-opacity: .9;
-				shape-rendering: crispEdges;
-			}
+            .node text {
+                pointer-events : none;
+                /* text-shadow : 0 1px 0 #fff; */
+            }
 
-			.node text {
-			  	pointer-events: none;
-			  	text-shadow: 0 1px 0 #fff;
-			}
+            .link {
+                fill : none;
+                /* stroke : #000; */
+                stroke-opacity : .05;
+            }
 
-			.link {
-			 	fill: none;
-			  	stroke: #000;
-			  	stroke-opacity: .2;
-			}
+            .link-strong {
+                fill : none;
+                /* stroke : #000; */
+                stroke-opacity : .15;
+            }
 
-			.link:hover {
-				stroke-opacity: .5;
-			}
+            .link:hover {
+                stroke-opacity : .5;
+            }
 
-			.rcorners1 {
-	    		border-radius: 15px;
-	    		border: 2px solid #8AC007;
-	    		padding: 20px;
+            .link-strong:hover {
+                stroke-opacity : .5;
+            }
 
-			}
+            .rcorners {
+                border-radius : 15px;
+                border : 2px solid #8AC007;
+                padding : 20px;
+            }
 
-		</style>
+            .border {
+                border : 1px solid rgba( 11,22,33,0.2);
+                stroke-opacity : .2;
+            }
+
+            #evolution {
+                width : 1000px;
+                height : 600px;
+            }
+
+        </style>
   
-	</head>
+    </head>
 
-  	<body>
+    <body>
 
-  		<header>
-  			<aside>April 8, 2015</aside>
-  			<p>Karsten Ahnert</p>
-		</header>
+        <header>
+            <aside>April 8, 2015</aside>
+            <p>Karsten Ahnert</p>
+        </header>
 
-  		<div id="container">
-<!--
-	  		<h1>Hello world!</h1>
+        <main>
 
-	  		<h2>Path test</h2>
+            <h1>Visualization of a genetic algorithm!</h1>
 
-	  		<div class="rcorners1">
+            <p id="evolution" class="border"></p>
 
-		  		<p id="pathtest">
-		  			<svg width="800" height="500">
-		  				<g transform="translate(20,20)">
-		  					<path style="stroke-width: 96.6;" d="M15,348.1C243.25,348.1 243.25,241.5000000000001 471.5,241.5000000000001" class="link"></path>
-	  					</g>
-		  			</svg>
-		  		</p>
+        </main>
 
-  			</div>
--->
-	  		<h2>Sankey test</h2>
+        <footer>
+            <aside>April 8, 2015</aside>
+            <p>Karsten Ahnert</p>
+        </footer>
+  
+    </body>
 
-	  		<p id="sankey"></p>
+    <script type="text/javascript" src="third_party/d3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="third_party/jquery-2.1.3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="flowchart.js" charset="utf-8"></script>
 
-		</div>
+    <script>
 
-		<footer>
-			<aside>April 8, 2015</aside>
-			<p>Karsten Ahnert</p>
-		</footer>
+        var evolution_height = $( "#evolution" ).height(), 
+            evolution_width  = $( "#evolution" ).width();
 
-  		<script>
-  			var margin = {top: 1, right: 1, bottom: 6, left: 1},
-				width = 2000 - margin.left - margin.right,
-				height = 1000 - margin.top - margin.bottom;
+        var margin = { top : 5 , right : 5 , bottom : 8 , left : 5} ,
+            width = evolution_width - margin.left - margin.right,
+            height = evolution_height - margin.top - margin.bottom;
 
-			var formatNumber = d3.format(",.0f"),
-				format = function(d) { return formatNumber(d) + " TWh"; },
-				color = d3.scale.category20();
+        var formatNumber = d3.format( ",.0f" ) ,
+            format = function( d ) { return formatNumber(d) + " TWh"; },
+            color = d3.scale.category20();
 
-			var svg = d3.select("#sankey").append("svg")
-					.attr("width", width + margin.left + margin.right)
-					.attr("height", height + margin.top + margin.bottom)
-					.append("g")
-					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var svg = d3.select( "#evolution" ).append( "svg" )
+                .attr( "width" , width + margin.left + margin.right )
+                .attr( "height" , height + margin.top + margin.bottom )
+            .append( "g" )
+                .attr( "transform" , "translate(" + margin.left + "," + margin.top + ")" );
 
-			var sankey = d3.sankey()
-				.nodeWidth(15)
-				.nodePadding(10)
-				.size([width, height]);
+        var flowchart  = d3.flowchart()
+                .nodeWidth( 10 )
+                .nodePadding( [ 10 , 0 ] )
+                .dy( 2 )
+                .deltax( 30 )
+                .size( [ width , height ] );
 
-			var path = sankey.link();
+        var path = flowchart.link();
 
-  		  	var data = {
-  		  		"nodes":[
-					{"name":"1_1"},
-					{"name":"1_2"},
-					{"name":"2_1"},
-					{"name":"2_2"},
-					{"name":"3_1"},
-					{"name":"3_2"},
-					{"name":"4_1"},
-					{"name":"4_2"}
-				] ,
-				"links" : [
-					{"source":0,"target":2,"value":2.0},
-					{"source":0,"target":3,"value":1.0},
-					{"source":1,"target":2,"value":1.0},
-					{"source":1,"target":3,"value":1.0},
-					{"source":2,"target":4,"value":1.0},
-					{"source":2,"target":4,"value":1.0},
-					{"source":3,"target":5,"value":1.0},
-					{"source":3,"target":5,"value":1.0}
-				] };
-			
-			// d3.json( "evol.json" , function( data ) {					
+        var data = {
+            "nodes": [
+                { "generation" : 0 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
+                { "generation" : 0 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
+                { "generation" : 0 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" } ,
+                { "generation" : 1 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
+                { "generation" : 1 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
+                { "generation" : 1 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" } ,
+                { "generation" : 2 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
+                { "generation" : 2 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
+                { "generation" : 2 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" }
+            ] ,
+            "links" : [
+                { "source" : 0 , "target" : 3 , "op" : 0 } ,
+                { "source" : 1 , "target" : 3 , "op" : 0 } ,
+                { "source" : 1 , "target" : 4 , "op" : 1 } ,
+                { "source" : 1 , "target" : 5 , "op" : 1 } ,
+                { "source" : 3 , "target" : 6 , "op" : 0 } ,
+                { "source" : 4 , "target" : 6 , "op" : 0 } ,
+                { "source" : 4 , "target" : 7 , "op" : 1 } ,
+                { "source" : 4 , "target" : 8 , "op" : 1 }
+            ] };
 
-				sankey.nodes(data.nodes)
-	  				.links(data.links)
-	  				.layout(50);
+        d3.json( "evol.json" , function( data ) {
 
-				var link = svg.append("g").selectAll(".link")
-	  				.data(data.links)
-					.enter().append("path")
-	  					.attr("class", "link")
-		  				.attr("d", path)
-	  					.style("stroke-width", function(d) { return Math.max(1, d.dy ); })
-	  					.sort(function(a, b) { return b.dy - a.dy; });
+            // calculate link positions
+            flowchart.nodes( data.nodes )
+                .links( data.links )
+                .layout();
 
-				var node = svg.append("g").selectAll(".node")
-	  				.data(data.nodes)
-					.enter().append("g")
-	  					.attr("class", "node")
-	  					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-					// .call(d3.behavior.drag()
-	  		// 			.origin(function(d) { return d; })
-	  		// 			.on("dragstart", function() { this.parentNode.appendChild(this); });
-	  					// .on("drag", dragmove));
+            // create nodes, hence a group for each node
+            var node = svg.append( "g" ).selectAll( ".node" )
+                .data( data.nodes )
+                .enter().append( "g" )
+                    .attr( "class" , "node" )
+                    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-				node.append("rect")
-	   				.attr("height", function(d) { return d.dy + 10 ; })
-	   				.attr("width", sankey.nodeWidth())
-	   				.style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
-	   				.style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
-					.append("title")
-	   				.text(function(d) { return d.name + "\n" + format(d.value); });
+            // create node color range
+            var node_color = d3.scale.linear()
+                .domain([1.0 , 0.7 , 0.0 ])
+                .range( ["red", "white", "green"] );
+            
+            // append a rect to each node
+            node.append( "rect" )
+                .attr( "height" , function( d ) { return d.dy; } )
+                .attr( "width" , flowchart.nodeWidth() )
+                .style( "fill" , function( d ) { return node_color( d.value ); } )
+                .append( "title" )
+                    .text( function( d ) { return format( d.value ); } );
 
-   			// });
-		</script>
+            // create link properties
+            var link_color = { "-1" : "red" , "0" : "blue" , "1" : "green" , "2" : "yellow" };
 
-	</body>
+            // create links
+            var link = svg.append( "g" ).selectAll( ".link" )
+                .data( data.links )
+                .enter().append( "path" )
+                    .attr( "class" , function( d ) { if( d.op == -1 ) { return "link-strong"; } else { return "link"; } } )
+                    .attr( "d" , path )
+                    .style( "stroke-width" , function( d ) { return Math.max( 1 , d.dy ); } )
+                    .style( "stroke" , function( d ) { return link_color[ d.op ]; } )
+                    // .sort(function(a, b) { return b.dy - a.dy; });
+
+
+        });
+
+    </script>
+
 
 </html>
