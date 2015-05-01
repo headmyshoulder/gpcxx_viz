@@ -37,8 +37,7 @@ d3.flowchart = function() {
   flowchart.sortType = function(_) {
     if(!arguments.length) return sortType;
     sortType = _;
-    computeNodeLinks();
-    computeNodePositions();
+    console.log( "Setting sort type to " + sortType );
     return flowchart;
   }
 
@@ -97,7 +96,7 @@ d3.flowchart = function() {
       .sortValues( function(d1,d2) { return d1.value > d2.value; } )
       .entries( nodes );
 
-    console.log( sortType );
+    console.log( "computeNodePosition with " + sortType );
 
     var n = nested_nodes.length;
     deltax = ( size[0] - n * nodeWidth - (n-1) * 2 * nodePadding[0] ) / (n-1);

@@ -8,6 +8,16 @@
         <link rel="stylesheet" href="style.css">
         <style>
 
+            body {
+                font-family: "Helvetica Neue",Helvetica,sans-serif;
+            }
+
+            form {
+                position: relative;
+                right: 0px;
+                top: 0px;
+            }
+
             .node rect {
                 /* cursor : move; */
                 /* fill-opacity : .9; */
@@ -55,14 +65,28 @@
                 border : 0px;
             }
 
-            #evolution {
-                width : 1800px;
-                height : 800px;
+            .aligned_absolute {
+                position : absolute;
+                left : 0px;
+                top : 0px;
             }
 
-            #sorttype {
+            .aligned_relative {
+                position : relative;
+                left : 0px;
+                top : 0px;
+            }
+
+
+            #evolution_container {
                 width : 1800px;
             }
+
+            #evolution {
+                width : 1798px;
+                height : 600px;
+            }
+
 
         </style>
   
@@ -79,26 +103,26 @@
 
             <h1>Visualization of a genetic algorithm!</h1>
 
-            <p id="evolution" class="border"></p>
-            
-            <div id="sorttype" class="border">
-                <div class="noborder">
+            <div id="evolution_container" class="border">
+                <!-- <div class="border"> -->
+                <form style="z-index:1">
                     Sort type:
-                    <div class="noborder">
-                        <input type="radio" id="unsorted" name="SortType" value="unsorted" checked="true"> <label for="unsorted">Unsorted</label> <br>
-                        <input type="radio" id="sorted" name="SortType" value="sorted"> <label for="sorted">Sorted</label> <br> 
-                        <input type="radio" id="values" name="SortType" value="value"> <label for="values">Values</label>
-                    </div>
-                </div>
-                <div class="noborder">
+                    <label><input type="radio" name="sort_type" value="unsorted" checked="true">Unsorted</label>
+                    <label><input type="radio" name="sort_type" value="sorted">Sorted</label>
+                    <label><input type="radio" name="sort_type" value="value">Values</label>
+                </form>
+
+                <form style="z-index:1">
                     Color type:
-                    <div class="noborder">
-                        <input type="radio" id="fitness" name="ColorTyoe" value="fitness" checked="true"><label for="fitness">Fitness</label><br>
-                        <input type="radio" id="size" name="ColorTyoe" value="size" ><label for="size">Size</label><br>
-                        <input type="radio" id="height" name="ColorTyoe" value="height" ><label for="height">Height</label><br>
-                    </div>
-                </div>
-             </div>
+                    <label><input type="radio" name="color_type" value="fitness" checked="true">Fitness</label>
+                    <label><input type="radio" name="color_type" value="size" >Size</label>
+                    <label><input type="radio" name="color_type" value="height" >Height</label>
+                </form>
+                <!-- </div> -->
+
+                <div id="evolution" />
+           </div>
+            
         </main>
 
         <footer>
@@ -128,6 +152,7 @@
         var svg = d3.select( "#evolution" ).append( "svg" )
                 .attr( "width" , width + margin.left + margin.right )
                 .attr( "height" , height + margin.top + margin.bottom )
+                .attr( "class" , "aligned" )
             .append( "g" )
                 .attr( "transform" , "translate(" + margin.left + "," + margin.top + ")" );
 
@@ -137,6 +162,8 @@
                 .dy( 2 )
                 .deltax( 30 )
                 .size( [ width , height ] );
+
+        flowchart.sortType( $('input[name=sort_type]:checked').val() )
 
         var path = flowchart.link();
 
@@ -211,6 +238,17 @@
                     .style( "stroke" , function( d ) { return link_color[ d.op ]; } )
                     // .sort(function(a, b) { return b.dy - a.dy; });
         });
+
+        d3.selectAll( "input[name=sort_type]" ).on( "change" , changeSort );
+        d3.selectAll( "input[name=color_type]" ).on( "change" , changeSort );
+
+        function changeSort() {
+            console.log( "change sort: " + this.value );
+        }
+
+        function changeColor() {
+            console.log( "change color: " + this.value );
+        }
 
         function mouse( e ) {
             return [ e.pageX - rx, e.pageY - ry ];
