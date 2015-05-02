@@ -32,18 +32,26 @@
 
             .link {
                 fill : none;
-                /* stroke : #000; */
+            }
+
+            .link-normal {
                 stroke-opacity : .05;
             }
 
             .link-strong {
-                fill : none;
-                /* stroke : #000; */
                 stroke-opacity : .15;
             }
 
             .link:hover {
                 stroke-opacity : .9;
+            }
+
+            .link-selected {
+                stroke-opacity : 1.0;
+            }
+
+            .static-link-selected {
+                stroke-opacity : 1.0;
             }
 
             .link-strong:hover {
@@ -106,10 +114,10 @@
             <div id="evolution_container" class="border">
                 <!-- <div class="border"> -->
                 <form style="z-index:1">
-                    Sort type:
-                    <label><input type="radio" name="sort_type" value="unsorted" checked="true">Unsorted</label>
+                    Fitness scaling:
+                    <label><input type="radio" name="sort_type" value="value" checked="true">Values</label>                    
                     <label><input type="radio" name="sort_type" value="sorted">Sorted</label>
-                    <label><input type="radio" name="sort_type" value="value">Values</label>
+                    <label><input type="radio" name="sort_type" value="unsorted">Unsorted</label>
                 </form>
 
                 <form style="z-index:1">
@@ -145,8 +153,8 @@
             width = evolution_width - margin.left - margin.right,
             height = evolution_height - margin.top - margin.bottom;
 
-        var formatNumber = d3.format( ",.0f" ) ,
-            format = function( d ) { return formatNumber(d) + " TWh"; },
+        var formatNumber = d3.format( "4.2f" ) ,
+            format = function( d ) { return "Fitness: " + formatNumber(d); },
             color = d3.scale.category20();
 
         var svg = d3.select( "#evolution" ).append( "svg" )
@@ -159,7 +167,7 @@
         var flowchart  = d3.flowchart()
                 .nodeWidth( 10 )
                 .nodePadding( [ 10 , 0 ] )
-                .dy( 2 )
+                .dy( 8 )
                 .deltax( 30 )
                 .size( [ width , height ] );
 
@@ -190,19 +198,34 @@
                 { "source" : 4 , "target" : 8 , "op" : 1 }
             ] };
 
+
+
         d3.json( "evol.json" , function( data ) {
 
-            // calculate link positions
+            // initialize the flowchart, create the graph
             flowchart.nodes( data.nodes )
                 .links( data.links )
-                .layout();
+                .init();
+            update();
+        } );
+
+        d3.selectAll( "input[name=sort_type]" ).on( "change" , changeSort );
+        d3.selectAll( "input[name=color_type]" ).on( "change" , changeColor );
+
+        function update() {
+
+            // remove all existing elements
+            svg.selectAll( "g" ).remove();
+
+            // calculate the node positions
+            flowchart.layout();
 
             // create nodes, hence a group for each node
             var node = svg.append( "g" ).selectAll( ".node" )
-                .data( data.nodes )
+                .data( flowchart.nodes() )
                 .enter().append( "g" )
                     .attr( "class" , "node" )
-                    .attr("transform" , function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+                    .attr( "transform" , function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
             // create node color range
             var node_color = d3.scale.linear()
@@ -221,6 +244,7 @@
                 // .style( "fill" , function( d ) { return node_color( d.value ); } )
                 .on( "mouseover" , mouseover )
                 .on( "mouseout" , mouseout )
+                .on( "mousedown" , mousedown )
                 .append( "title" )
                     .text( function( d ) { return format( d.value ); } );
 
@@ -230,50 +254,44 @@
 
             // create links
             var link = svg.append( "g" ).selectAll( ".link" )
-                .data( data.links )
+                .data( flowchart.links() )
                 .enter().append( "path" )
-                    .attr( "class" , function( d ) { if( d.op == -1 ) { return "link-strong"; } else { return "link"; } } )
+                    .attr( "class" , function( d ) {
+                        str = "";
+                        if( d.op == -1 ) { str = "link link-strong"; } else { str = "link link-normal"; }
+                        d.ancestor_of.forEach( function( d ) { str += " ancestor-of-" + d } );
+                        return str;
+                        } )
                     .attr( "d" , path )
                     .style( "stroke-width" , function( d ) { return Math.max( 1 , d.dy ); } )
-                    .style( "stroke" , function( d ) { return link_color[ d.op ]; } )
-                    // .sort(function(a, b) { return b.dy - a.dy; });
-        });
-
-        d3.selectAll( "input[name=sort_type]" ).on( "change" , changeSort );
-        d3.selectAll( "input[name=color_type]" ).on( "change" , changeSort );
+                    .style( "stroke" , function( d ) { return link_color[ d.op ]; } );
+        }
 
         function changeSort() {
-            console.log( "change sort: " + this.value );
+            flowchart.sortType( $('input[name=sort_type]:checked').val() )
+            update();
         }
 
         function changeColor() {
-            console.log( "change color: " + this.value );
-        }
-
-        function mouse( e ) {
-            return [ e.pageX - rx, e.pageY - ry ];
         }
 
         function mouseover( d ) {
-            console.log( "mouseover" );
-            // svg.selectAll("path.link.target-" + d.key)
-            //     .classed("target", true)
-            //     .each(updateNodes("source", true));
-
-            // svg.selectAll("path.link.source-" + d.key)
-            //     .classed("source", true)
-            //     .each(updateNodes("target", true));
+            svg.selectAll( "path.link.ancestor-of-" + d.key )
+               .classed( "link-selected" , true );
         }
 
         function mouseout( d ) {
-            console.log( "mouseout" );
-            // svg.selectAll("path.link.source-" + d.key)
-            //     .classed("source", false)
-            //     .each(updateNodes("target", false));
+            svg.selectAll( "path.link.ancestor-of-" + d.key )
+               .classed( "link-selected" , false );
+        }
 
-            // svg.selectAll("path.link.target-" + d.key)
-            //     .classed("target", false)
-            //     .each(updateNodes("source", false));
+        function mousedown( d ) {
+            svg.selectAll( "path.link" )
+                .classed( "static-link-selected" , false );
+
+            svg.selectAll( "path.link.ancestor-of-" + d.key )
+                .classed( "static-link-selected" , true );
+
         }
 
     </script>
