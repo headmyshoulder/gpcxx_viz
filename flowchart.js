@@ -1,27 +1,27 @@
 d3.flowchart = function()
 {
     var flowchart = {},
-    nodeWidth = 24,
-    nodePadding = [ 2 , 8 ],
+    node_width = 24,
+    node_padding = [ 2 , 8 ],
     size = [1, 1],
-      deltax = 0,
+    deltax = 0,
     dy = 10,
-    sortType = "values" ,
+    sort_type = "values" ,
     nodes = [],
     links = [];
 
 
-    flowchart.nodeWidth = function( _ )
+    flowchart.node_width = function( _ )
     {
-        if( !arguments.length ) return nodeWidth;
-        nodeWidth = +_;
+        if( !arguments.length ) return node_width;
+        node_width = +_;
         return flowchart;
     };
 
-    flowchart.nodePadding = function( _ )
+    flowchart.node_padding = function( _ )
     {
-        if( !arguments.length ) return nodePadding;
-        nodePadding = _;
+        if( !arguments.length ) return node_padding;
+        node_padding = _;
         return flowchart;
     };
 
@@ -39,10 +39,10 @@ d3.flowchart = function()
         return flowchart;
     }
 
-    flowchart.sortType = function( _ )
+    flowchart.sort_type = function( _ )
     {
-        if( !arguments.length ) return sortType;
-        sortType = _;
+        if( !arguments.length ) return sort_type;
+        sort_type = _;
         return flowchart;
     }
 
@@ -98,24 +98,24 @@ d3.flowchart = function()
 
     flowchart.init = function()
     {
-        computeNodeLinks();
-        computeAncestors();
+        compute_node_links();
+        compute_ancestors();
     }
 
     flowchart.layout = function()
     {
-        computeNodePositions();
+        compute_node_positions();
     }
 
-    function computeNodeLinks()
+    function compute_node_links()
     {
         var i = 0 ,
             max_size = 0 ,
             max_height = 0;
         nodes.forEach( function( node ) {
-            node.sourceLinks = [];
-            node.targetLinks = [];
-            node.key = "Node-" + i;
+            node.source_links = [];
+            node.target_links = [];
+            node.key = "node-" + i;
             if( node.size > max_size ) { max_size = node.size; }
             if( node.height > max_height ) { max_height = node.height; }
             i += 1;
@@ -131,42 +131,42 @@ d3.flowchart = function()
                 target = link.target;
             if (typeof source === "number") source = link.source = nodes[link.source];
             if (typeof target === "number") target = link.target = nodes[link.target];
-            source.sourceLinks.push( link );
-            target.targetLinks.push( link );
+            source.source_links.push( link );
+            target.target_links.push( link );
             link.dy = dy;
-            link.key = "Link-" + i;
+            link.key = "link-" + i;
             i += 1;
             } );
     }
 
-    var walkAncestors = function ( node , currentNode , generations )
+    var walk_ancestors = function ( node , current_node , generations )
     {
-        currentNode.targetLinks.forEach( function( link ) {
+        current_node.target_links.forEach( function( link ) {
             link.ancestor_of.push( node.key );
             } );
         if( generations > 1 )
         {
-            currentNode.targetLinks.forEach( function( link ) {
+            current_node.target_links.forEach( function( link ) {
                 link.source.ancestor_of.push( node.key );
-                walkAncestors( node , link.source , generations - 1 );
+                walk_ancestors( node , link.source , generations - 1 );
                 } );
         }
     }
 
-    function computeAncestors()
+    function compute_ancestors()
     {
         links.forEach( function( link ) {
-            link.ancestor_of = []; });
+            link.ancestor_of = []; } );
         nodes.forEach( function( node ) {
             node.ancestor_of = []; } );
         nodes.forEach( function( node ) {
-            walkAncestors( node , node , 12 ); });
+            walk_ancestors( node , node , 12 ); } );
     }
 
-    function computeNodePositions()
+    function compute_node_positions()
     {
         var nested_nodes = null;
-        if( sortType == "sorted" )
+        if( sort_type == "sorted" )
         {
             nested_nodes = d3.nest()
                 .key( function( d ) { return d.generation;} )
@@ -181,23 +181,23 @@ d3.flowchart = function()
         }
 
         var n = nested_nodes.length;
-        deltax = ( size[0] - n * nodeWidth - (n-1) * 2 * nodePadding[0] ) / (n-1);
+        deltax = ( size[0] - n * node_width - (n-1) * 2 * node_padding[0] ) / (n-1);
         for( var i=0 ; i<n ; ++i )
         {
             for( var j=0 ; j<nested_nodes[i].values.length ; ++j )
             {
                 var node = nested_nodes[i].values[j];
-                node.x = i * ( nodeWidth + 2 * nodePadding[0] + deltax );
-                if( ( sortType == "sorted" ) || ( sortType == "unsorted" ) )
+                node.x = i * ( node_width + 2 * node_padding[0] + deltax );
+                if( ( sort_type == "sorted" ) || ( sort_type == "unsorted" ) )
                 {
-                    // node.y = dy + j * ( dy + nodePadding[1] );
+                    // node.y = dy + j * ( dy + node_padding[1] );
                     node.y = dy + j * size[1] / nested_nodes[i].values.length;
                 }
                 else
                 {
                     node.y = ( node.fitness ) * size[1];
                 }
-                node.dx = nodeWidth;
+                node.dx = node_width;
                 node.dy = dy;
             }
         }

@@ -169,11 +169,11 @@
             width = evolution_width - margin.left - margin.right,
             height = evolution_height - margin.top - margin.bottom;
 
-        var formatNumber = d3.format( "4.2f" ) ,
+        var format_number = d3.format( "4.2f" ) ,
             format = function( d ) {
-                str  = "Fitness: " + formatNumber( d.fitness );
-                str += " ,size: " + formatNumber( d.size ) + "(" + formatNumber( d.scaled_size ) + ")";
-                str += " ,height: " + formatNumber( d.height ) + "(" + formatNumber( d.scaled_height ) + ")";
+                str  = "Fitness: " + format_number( d.fitness );
+                str += " ,size: " + format_number( d.size ) + "(" + format_number( d.scaled_size ) + ")";
+                str += " ,height: " + format_number( d.height ) + "(" + format_number( d.scaled_height ) + ")";
                 return  str;
             } ,
             color = d3.scale.category20();
@@ -186,13 +186,13 @@
                 .attr( "transform" , "translate(" + margin.left + "," + margin.top + ")" );
 
         var flowchart  = d3.flowchart()
-                .nodeWidth( 10 )
-                .nodePadding( [ 10 , 0 ] )
+                .node_width( 10 )
+                .node_padding( [ 10 , 0 ] )
                 .dy( 2 )
                 .deltax( 30 )
                 .size( [ width , height ] );
 
-        flowchart.sortType( $('input[name=sort_type]:checked').val() )
+        flowchart.sort_type( $('input[name=sort_type]:checked').val() )
 
         var path = flowchart.link();
 
@@ -205,8 +205,8 @@
             update();
         } );
 
-        d3.selectAll( "input[name=sort_type]" ).on( "change" , changeSort );
-        d3.selectAll( "input[name=color_type]" ).on( "change" , changeColor );
+        d3.selectAll( "input[name=sort_type]" ).on( "change" , change_sort );
+        d3.selectAll( "input[name=color_type]" ).on( "change" , change_color );
 
         function get_node_color() {
             color_type = $('input[name=color_type]:checked').val();
@@ -255,7 +255,7 @@
             // append a rect to each node
             var rect = node.append( "rect" )
                 .attr( "height" , function( d ) { return d.dy; } )
-                .attr( "width" , flowchart.nodeWidth() )
+                .attr( "width" , flowchart.node_width() )
                 .style( "fill" , get_node_color() )
                 .on( "mouseover" , mouseover )
                 .on( "mouseout" , mouseout )
@@ -282,18 +282,18 @@
                     .style( "stroke" , function( d ) { return link_color[ d.op ]; } );
         }
 
-        function updateColor() {
+        function update_color() {
             var node = svg.selectAll( "g.node rect" );
             node.style( "fill" , get_node_color() );
         }
 
-        function changeSort() {
-            flowchart.sortType( $('input[name=sort_type]:checked').val() )
+        function change_sort() {
+            flowchart.sort_type( $('input[name=sort_type]:checked').val() )
             update();
         }
 
-        function changeColor() {
-            updateColor();
+        function change_color() {
+            update_color();
         }
 
         function mouseover( d ) {
