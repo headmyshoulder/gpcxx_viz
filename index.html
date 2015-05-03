@@ -54,6 +54,23 @@
                 stroke-opacity : 1.0;
             }
 
+            .node-selected {
+                fill : #000 !important;
+                stroke : #000 !important;
+                stroke-width : 1 !important;
+                stroke-opacity : 1.0 !important;
+                z-index : 1 !important;
+            }
+
+            .static-node-selected {
+                fill : #000 !important;
+                stroke : #000 !important;
+                stroke-width : 1 !important;
+                stroke-opacity : 1.0 !important;
+                z-index : 1 !important;
+            }
+
+
             .link-strong:hover {
                 stroke-opacity : .5;
             }
@@ -154,7 +171,12 @@
             height = evolution_height - margin.top - margin.bottom;
 
         var formatNumber = d3.format( "4.2f" ) ,
-            format = function( d ) { return "Fitness: " + formatNumber(d); },
+            format = function( d ) {
+                str  = "Fitness: " + formatNumber( d.fitness );
+                str += " ,size: " + formatNumber( d.size ) + "(" + formatNumber( d.scaled_size ) + ")";
+                str += " ,height: " + formatNumber( d.height ) + "(" + formatNumber( d.scaled_height ) + ")";
+                return  str;
+            } ,
             color = d3.scale.category20();
 
         var svg = d3.select( "#evolution" ).append( "svg" )
@@ -167,7 +189,7 @@
         var flowchart  = d3.flowchart()
                 .nodeWidth( 10 )
                 .nodePadding( [ 10 , 0 ] )
-                .dy( 8 )
+                .dy( 2 )
                 .deltax( 30 )
                 .size( [ width , height ] );
 
@@ -212,6 +234,32 @@
         d3.selectAll( "input[name=sort_type]" ).on( "change" , changeSort );
         d3.selectAll( "input[name=color_type]" ).on( "change" , changeColor );
 
+        function get_node_color() {
+            color_type = $('input[name=color_type]:checked').val();
+            
+            if( color_type == "fitness" )
+            {
+                var node_color = d3.scale.linear()
+                    .domain([1.0 , 0.7 , 0.0 ])
+                    .range( ["red", "white", "green"] );
+                return function( d ) { return node_color( d.value ); }
+            }
+            if( color_type == "size" )
+            {
+                var node_color_size = d3.scale.linear()
+                    .domain( [ 0.0 , 0.01 , 0.1 ] )
+                    .range( [ "green" , "white" , "red" ] );
+                return function( d ) { return node_color_size( d.scaled_size ); }
+            }
+            if( color_type == "height" )
+            {
+                var node_color_size = d3.scale.linear()
+                    .domain( [ 0.0 , 0.5 , 1.0 ] )
+                    .range( [ "green" , "white" , "red" ] );
+                return function( d ) { return node_color_size( d.scaled_height ); }
+            }
+        }
+
         function update() {
 
             // remove all existing elements
@@ -224,29 +272,22 @@
             var node = svg.append( "g" ).selectAll( ".node" )
                 .data( flowchart.nodes() )
                 .enter().append( "g" )
-                    .attr( "class" , "node" )
+                    .attr( "class" , function( d ) {
+                        str = "node";
+                        d.ancestor_of.forEach( function( d ) { str += " ancestor-of-" + d; } );
+                        return str; } )
                     .attr( "transform" , function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-            // create node color range
-            var node_color = d3.scale.linear()
-                .domain([1.0 , 0.7 , 0.0 ])
-                .range( ["red", "white", "green"] );
-
-            var node_color_size = d3.scale.linear()
-                .domain( [ 1 , 10 , 100 ] )
-                .range( [ "green" , "white" , "red" ] );
-            
             // append a rect to each node
             var rect = node.append( "rect" )
                 .attr( "height" , function( d ) { return d.dy; } )
                 .attr( "width" , flowchart.nodeWidth() )
-                .style( "fill" , function( d ) { return node_color_size( d.size ); } )
-                // .style( "fill" , function( d ) { return node_color( d.value ); } )
+                .style( "fill" , get_node_color() )
                 .on( "mouseover" , mouseover )
                 .on( "mouseout" , mouseout )
                 .on( "mousedown" , mousedown )
                 .append( "title" )
-                    .text( function( d ) { return format( d.value ); } );
+                    .text( function( d ) { return format( d ); } );
 
             // create link properties
             // elite, mutation, crossover, reproduce
@@ -259,12 +300,17 @@
                     .attr( "class" , function( d ) {
                         str = "";
                         if( d.op == -1 ) { str = "link link-strong"; } else { str = "link link-normal"; }
-                        d.ancestor_of.forEach( function( d ) { str += " ancestor-of-" + d } );
+                        d.ancestor_of.forEach( function( d ) { str += " ancestor-of-" + d; } );
                         return str;
                         } )
                     .attr( "d" , path )
                     .style( "stroke-width" , function( d ) { return Math.max( 1 , d.dy ); } )
                     .style( "stroke" , function( d ) { return link_color[ d.op ]; } );
+        }
+
+        function updateColor() {
+            var node = svg.selectAll( "g.node rect" );
+            node.style( "fill" , get_node_color() );
         }
 
         function changeSort() {
@@ -273,24 +319,38 @@
         }
 
         function changeColor() {
+            updateColor();
         }
 
         function mouseover( d ) {
             svg.selectAll( "path.link.ancestor-of-" + d.key )
                .classed( "link-selected" , true );
+
+            svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
+                .classed( "node-selected" , true );
         }
 
         function mouseout( d ) {
             svg.selectAll( "path.link.ancestor-of-" + d.key )
                .classed( "link-selected" , false );
+
+            svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
+                .classed( "node-selected" , false );
         }
 
         function mousedown( d ) {
             svg.selectAll( "path.link" )
                 .classed( "static-link-selected" , false );
 
+            svg.selectAll( "g.node rect")
+                .classed( "static-node-selected" , false );
+
             svg.selectAll( "path.link.ancestor-of-" + d.key )
                 .classed( "static-link-selected" , true );
+
+            svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
+                .classed( "static-node-selected" , true );
+
 
         }
 

@@ -95,11 +95,19 @@ d3.flowchart = function() {
 
   function computeNodeLinks() {
     var i = 0;
+    var max_size = 0;
+    var max_height = 0;
     nodes.forEach(function(node) {
       node.sourceLinks = [];
       node.targetLinks = [];
       node.key = "Node-" + i;
+      if( node.size > max_size ) { max_size = node.size; }
+      if( node.height > max_height ) { max_height = node.height; }
       i += 1;
+    });
+    nodes.forEach( function( node ) {
+      node.scaled_size = node.size / max_size;
+      node.scaled_height = node.height / max_height;
     });
     var i = 0;
     links.forEach(function(link) {
@@ -121,7 +129,7 @@ d3.flowchart = function() {
     });
     if( generations > 1 ) {  
       currentNode.targetLinks.forEach( function( link ) {
-        link.source.ancestor_of.push( node );
+        link.source.ancestor_of.push( node.key );
         walkAncestors( node , link.source , generations - 1 );
       } );
     }
@@ -145,17 +153,15 @@ d3.flowchart = function() {
     {
       nested_nodes = d3.nest()
         .key( function(d) { return d.generation;} )
-        .sortValues( function(d1,d2) { return d1.value > d2.value; } )
+        .sortValues( function(d1,d2) { return d1.fitness > d2.fitness; } )
         .entries( nodes );
-    } else {
+    }
+    else
+    {
       nested_nodes = d3.nest()
         .key( function(d) { return d.generation;} )
         .entries( nodes );
     }
-    // if( sortType == "sorted" ) {
-    //   nested_nodes.sortValues( function(d1,d2) { return d1.value > d2.value; } );
-    // }
-    // nested_nodes.entries( nodes );
 
     var n = nested_nodes.length;
     deltax = ( size[0] - n * nodeWidth - (n-1) * 2 * nodePadding[0] ) / (n-1);
@@ -172,7 +178,7 @@ d3.flowchart = function() {
         }
         else
         {
-          node.y = ( node.value ) * size[1];
+          node.y = ( node.fitness ) * size[1];
         }
         node.dx = nodeWidth;
         node.dy = dy;
