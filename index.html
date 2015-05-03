@@ -5,7 +5,6 @@
   
         <meta charset="utf-8">
         <title>Visualization of a genetic algorithm</title>
-        <link rel="stylesheet" href="style.css">
         <style>
 
             body {
@@ -197,31 +196,6 @@
 
         var path = flowchart.link();
 
-        var data = {
-            "nodes": [
-                { "generation" : 0 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
-                { "generation" : 0 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
-                { "generation" : 0 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" } ,
-                { "generation" : 1 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
-                { "generation" : 1 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
-                { "generation" : 1 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" } ,
-                { "generation" : 2 , "name" : "1" ,  "value" : 1.0 , "formula" : "x*x" } ,
-                { "generation" : 2 , "name" : "2" ,  "value" : 0.9 , "formula" : "x*x" } ,
-                { "generation" : 2 , "name" : "3" ,  "value" : 0.1 , "formula" : "x*x" }
-            ] ,
-            "links" : [
-                { "source" : 0 , "target" : 3 , "op" : 0 } ,
-                { "source" : 1 , "target" : 3 , "op" : 0 } ,
-                { "source" : 1 , "target" : 4 , "op" : 1 } ,
-                { "source" : 1 , "target" : 5 , "op" : 1 } ,
-                { "source" : 3 , "target" : 6 , "op" : 0 } ,
-                { "source" : 4 , "target" : 6 , "op" : 0 } ,
-                { "source" : 4 , "target" : 7 , "op" : 1 } ,
-                { "source" : 4 , "target" : 8 , "op" : 1 }
-            ] };
-
-
-
         d3.json( "evol.json" , function( data ) {
 
             // initialize the flowchart, create the graph
@@ -242,7 +216,7 @@
                 var node_color = d3.scale.linear()
                     .domain([1.0 , 0.7 , 0.0 ])
                     .range( ["red", "white", "green"] );
-                return function( d ) { return node_color( d.value ); }
+                return function( d ) { return node_color( d.fitness ); }
             }
             if( color_type == "size" )
             {
