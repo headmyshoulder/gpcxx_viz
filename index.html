@@ -89,19 +89,6 @@
                 border : 0px;
             }
 
-            .aligned_absolute {
-                position : absolute;
-                left : 0px;
-                top : 0px;
-            }
-
-            .aligned_relative {
-                position : relative;
-                left : 0px;
-                top : 0px;
-            }
-
-
             #evolution_container {
                 width : 1800px;
             }
@@ -137,7 +124,7 @@
                 </form>
 
                 <form style="z-index:1">
-                    Color type:
+                    Node colors:
                     <label><input type="radio" name="color_type" value="fitness" checked="true">Fitness</label>
                     <label><input type="radio" name="color_type" value="size" >Size</label>
                     <label><input type="radio" name="color_type" value="height" >Height</label>
@@ -187,9 +174,7 @@
 
         var flowchart  = d3.flowchart()
                 .node_width( 10 )
-                .node_padding( [ 10 , 0 ] )
-                .dy( 2 )
-                .deltax( 30 )
+                .node_height( 2 )
                 .size( [ width , height ] );
 
         flowchart.sort_type( $('input[name=sort_type]:checked').val() )
@@ -208,34 +193,35 @@
         d3.selectAll( "input[name=sort_type]" ).on( "change" , change_sort );
         d3.selectAll( "input[name=color_type]" ).on( "change" , change_color );
 
-        function get_node_color() {
+        function get_node_color()
+        {
             color_type = $('input[name=color_type]:checked').val();
             
             if( color_type == "fitness" )
             {
-                var node_color = d3.scale.linear()
+                var color = d3.scale.linear()
                     .domain([1.0 , 0.7 , 0.0 ])
                     .range( ["red", "white", "green"] );
-                return function( d ) { return node_color( d.fitness ); }
+                return function( d ) { return color( d.fitness ); }
             }
             if( color_type == "size" )
             {
-                var node_color_size = d3.scale.linear()
+                var color = d3.scale.linear()
                     .domain( [ 0.0 , 0.01 , 0.1 ] )
                     .range( [ "green" , "white" , "red" ] );
-                return function( d ) { return node_color_size( d.scaled_size ); }
+                return function( d ) { return color( d.scaled_size ); }
             }
             if( color_type == "height" )
             {
-                var node_color_size = d3.scale.linear()
+                var color = d3.scale.linear()
                     .domain( [ 0.0 , 0.5 , 1.0 ] )
                     .range( [ "green" , "white" , "red" ] );
-                return function( d ) { return node_color_size( d.scaled_height ); }
+                return function( d ) { return color( d.scaled_height ); }
             }
         }
 
-        function update() {
-
+        function update()
+        {
             // remove all existing elements
             svg.selectAll( "g" ).remove();
 
@@ -282,21 +268,25 @@
                     .style( "stroke" , function( d ) { return link_color[ d.op ]; } );
         }
 
-        function update_color() {
+        function update_color()
+        {
             var node = svg.selectAll( "g.node rect" );
             node.style( "fill" , get_node_color() );
         }
 
-        function change_sort() {
+        function change_sort()
+        {
             flowchart.sort_type( $('input[name=sort_type]:checked').val() )
             update();
         }
 
-        function change_color() {
+        function change_color()
+        {
             update_color();
         }
 
-        function mouseover( d ) {
+        function mouseover( d )
+        {
             svg.selectAll( "path.link.ancestor-of-" + d.key )
                .classed( "link-selected" , true );
 
@@ -304,7 +294,8 @@
                 .classed( "node-selected" , true );
         }
 
-        function mouseout( d ) {
+        function mouseout( d )
+        {
             svg.selectAll( "path.link.ancestor-of-" + d.key )
                .classed( "link-selected" , false );
 
@@ -312,7 +303,8 @@
                 .classed( "node-selected" , false );
         }
 
-        function mousedown( d ) {
+        function mousedown( d )
+        {
             svg.selectAll( "path.link" )
                 .classed( "static-link-selected" , false );
 
@@ -324,8 +316,6 @@
 
             svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
                 .classed( "static-node-selected" , true );
-
-
         }
 
     </script>

@@ -1,14 +1,12 @@
 d3.flowchart = function()
 {
     var flowchart = {},
-    node_width = 24,
-    node_padding = [ 2 , 8 ],
-    size = [1, 1],
-    deltax = 0,
-    dy = 10,
-    sort_type = "values" ,
-    nodes = [],
-    links = [];
+        node_width = 24 ,
+        node_height = 2 ,
+        size = [1, 1] ,
+        sort_type = "values" ,
+        nodes = [],
+        links = [];
 
 
     flowchart.node_width = function( _ )
@@ -25,10 +23,10 @@ d3.flowchart = function()
         return flowchart;
     };
 
-    flowchart.dy = function( _ )
+    flowchart.node_height = function( _ )
     {
-        if( !arguments.length ) return dy;
-        dy = _;
+        if( !arguments.length ) return node_height;
+        node_height = _;
         return flowchart;
     }
 
@@ -133,7 +131,7 @@ d3.flowchart = function()
             if (typeof target === "number") target = link.target = nodes[link.target];
             source.source_links.push( link );
             target.target_links.push( link );
-            link.dy = dy;
+            link.dy = node_height;
             link.key = "link-" + i;
             i += 1;
             } );
@@ -181,24 +179,24 @@ d3.flowchart = function()
         }
 
         var n = nested_nodes.length;
-        deltax = ( size[0] - n * node_width - (n-1) * 2 * node_padding[0] ) / (n-1);
+        deltax = ( size[0] - n * node_width ) / (n-1);
+        console.log( deltax );
         for( var i=0 ; i<n ; ++i )
         {
             for( var j=0 ; j<nested_nodes[i].values.length ; ++j )
             {
                 var node = nested_nodes[i].values[j];
-                node.x = i * ( node_width + 2 * node_padding[0] + deltax );
+                node.x = i * ( node_width + deltax );
                 if( ( sort_type == "sorted" ) || ( sort_type == "unsorted" ) )
                 {
-                    // node.y = dy + j * ( dy + node_padding[1] );
-                    node.y = dy + j * size[1] / nested_nodes[i].values.length;
+                    node.y = node_height + j * size[1] / nested_nodes[i].values.length;
                 }
                 else
                 {
                     node.y = ( node.fitness ) * size[1];
                 }
                 node.dx = node_width;
-                node.dy = dy;
+                node.dy = node_height;
             }
         }
     }
