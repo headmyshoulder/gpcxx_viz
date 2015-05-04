@@ -180,7 +180,6 @@ d3.flowchart = function()
 
         var n = nested_nodes.length;
         deltax = ( size[0] - n * node_width ) / (n-1);
-        console.log( deltax );
         for( var i=0 ; i<n ; ++i )
         {
             for( var j=0 ; j<nested_nodes[i].values.length ; ++j )
