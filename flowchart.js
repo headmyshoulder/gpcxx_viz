@@ -4,7 +4,8 @@ d3.flowchart = function()
         node_width = 24 ,
         node_height = 2 ,
         size = [1, 1] ,
-        sort_type = "values" ,
+        sort_type = "fitness" ,
+        scale_type = "scaled" ,
         nodes = [],
         links = [];
 
@@ -41,6 +42,13 @@ d3.flowchart = function()
     {
         if( !arguments.length ) return sort_type;
         sort_type = _;
+        return flowchart;
+    }
+
+    flowchart.scale_type = function( _ )
+    {
+        if( !arguments.length ) return scale_type;
+        scale_type = _;
         return flowchart;
     }
 
@@ -107,20 +115,12 @@ d3.flowchart = function()
 
     function compute_node_links()
     {
-        var i = 0 ,
-            max_size = 0 ,
-            max_height = 0;
+        var i = 0;
         nodes.forEach( function( node ) {
             node.source_links = [];
             node.target_links = [];
             node.key = "node-" + i;
-            if( node.size > max_size ) { max_size = node.size; }
-            if( node.height > max_height ) { max_height = node.height; }
             i += 1;
-            } );
-        nodes.forEach( function( node ) {
-            node.scaled_size = node.size / max_size;
-            node.scaled_height = node.height / max_height;
             } );
         
         i = 0;
@@ -161,14 +161,23 @@ d3.flowchart = function()
             walk_ancestors( node , node , 12 ); } );
     }
 
+    function value( d , key ) { return d[ key ]; }
+
+    function sort_function()
+    {
+        return function( d1 , d2 ) { return ( d1[ sort_type ] > d2[ sort_type ] ); };
+    }
+
     function compute_node_positions()
     {
+        console.log( "Updating flowchart with sort type \"" + sort_type + "\" and scale type \"" + scale_type + "\"")
         var nested_nodes = null;
-        if( sort_type == "sorted" )
+        if( sort_type != "unsorted" )
         {
+
             nested_nodes = d3.nest()
                 .key( function( d ) { return d.generation;} )
-                .sortValues( function( d1 , d2 ) { return d1.fitness > d2.fitness; } )
+                .sortValues( sort_function() )
                 .entries( nodes );
         }
         else
@@ -186,13 +195,13 @@ d3.flowchart = function()
             {
                 var node = nested_nodes[i].values[j];
                 node.x = i * ( node_width + deltax );
-                if( ( sort_type == "sorted" ) || ( sort_type == "unsorted" ) )
+                if( scale_type == "unscaled" || sort_type == "unsorted" )
                 {
                     node.y = node_height + j * size[1] / nested_nodes[i].values.length;
                 }
                 else
                 {
-                    node.y = ( node.fitness ) * size[1];
+                    node.y = node[ sort_type ] * size[1];
                 }
                 node.dx = node_width;
                 node.dy = node_height;
