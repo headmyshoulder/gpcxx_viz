@@ -261,6 +261,14 @@
                 .range( color_range );
 
             update_visualization();
+
+            var d = flowchart.nodes()[ flowchart.nodes().length-1 ];
+
+            svg.selectAll( "path.link.ancestor-of-" + d.key )
+                .classed( "static-link-selected" , true );
+
+            svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
+                .classed( "static-node-selected" , true );
         } );
 
         d3.selectAll( "input[name=sort_type]" ).on( "change" , change_visualization );
@@ -379,6 +387,7 @@
             svg.selectAll( "g.node.ancestor-of-" + d.key + " rect")
                 .classed( "static-node-selected" , true );
         }
+
 
     </script>
 
