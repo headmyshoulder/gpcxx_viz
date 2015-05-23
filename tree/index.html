@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Visualization of tree</title>
+        <style>
+
+            .node rect {
+                fill : #fff;
+                stroke : steelblue;
+                stroke-width : 1.5px;
+                stroke-opacity : 1.0;
+            }
+
+            .node {
+                font: 10px sans-serif;
+            }
+
+            .link {
+                fill : none;
+                stroke : #999;
+                stroke-width : 1.5px;
+                stroke-opacity : 1.0;
+            }
+
+            .border {
+                border : 1px solid rgba( 11,22,33,0.2);
+                stroke-opacity : .2;
+            }
+
+            #tree_container {
+                width : 800px;
+                height : 350px;
+            }
+
+            #tree {
+                width : 800px;
+                height : 350px;
+            }
+
+
+        </style>
+    </head>
+
+    <body>
+
+        <main>
+
+            <h1>Visualization of a tree in symbolic regression</h1>
+
+            <div id="tree_container" class="border">
+                <div id="tree"></div>
+            </div>
+
+        </main>
+
+        <footer>
+            <aside>May 9, 2015</aside>
+            <p>Karsten Ahnert</p>
+        </footer>
+
+    </body>
+
+
+    <script type="text/javascript" src="../third_party/d3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../third_party/jquery-2.1.3.min.js" charset="utf-8"></script>
+
+    <script>
+
+    var diameter = 960;
+
+    var tree_height = $( "#tree" ).height(), 
+        tree_width  = $( "#tree" ).width();
+
+    var width = tree_width - 50 ,
+        height = tree_height - 50;
+
+    var tree = d3.layout.tree()
+        .size( [ width , height ] )
+        .separation( function( a , b ) { return 1; } );
+
+    var diagonal = d3.svg.diagonal()
+        .projection( function( d ) { return [ d.x , d.y ]; } );
+
+    var svg = d3.select( "#tree" ).append( "svg" )
+            .attr( "width" , tree_width )
+            .attr( "height" , tree_height )
+            .append( "g" )
+                .attr( "transform" , "translate(0,10)")
+
+    d3.json( "tree.json" , function( error , root )
+        {
+            var nodes = tree.nodes( root ),
+                links = tree.links( nodes );
+
+            var link = svg.selectAll(".link")
+                  .data(links)
+              .enter().append("path")
+                  .attr("class", "link")
+                  .attr("d", diagonal);
+
+            var node = svg.selectAll(".node")
+                .data(nodes)
+              .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";  })
+
+            node.append("text")
+                .attr("x", 6)
+                .attr("y",10)
+                .attr("dy", ".32em")
+                .text(function(d) { return d.value; })
+                .each(function(d) { d.width = this.getComputedTextLength() + 12; });
+
+            node.insert("rect", "text")
+                .attr("ry", 6)
+                .attr("rx", 6)
+                .attr("y", 0)
+                .attr("height", 20)
+                .attr("width", function(d) { return Math.max(32, d.width); });
+
+            node.append("rect");
+        }
+    );
+
+    </script>
+
+</html>

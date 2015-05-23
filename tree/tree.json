@@ -1,0 +1,176 @@
+{
+  "value" : "log" ,
+  "children" : [
+    {
+      "value" : "exp" ,
+      "children" : [
+        {
+          "value" : "exp" ,
+          "children" : [
+            {
+              "value" : "exp" ,
+              "children" : [
+                {
+                  "value" : "/" ,
+                  "children" : [
+                    {
+                      "value" : "+" ,
+                      "children" : [
+                        {
+                          "value" : "/" ,
+                          "children" : [
+                            {
+                              "value" : "cos" ,
+                              "children" : [
+                                {
+                                  "value" : "-" ,
+                                  "children" : [
+                                    {
+                                      "value" : "x" ,
+                                      "children" : []
+                                    } ,
+                                    {
+                                      "value" : "x" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            } ,
+                            {
+                              "value" : "log" ,
+                              "children" : [
+                                {
+                                  "value" : "/" ,
+                                  "children" : [
+                                    {
+                                      "value" : "z" ,
+                                      "children" : []
+                                    } ,
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        } ,
+                        {
+                          "value" : "+" ,
+                          "children" : [
+                            {
+                              "value" : "+" ,
+                              "children" : [
+                                {
+                                  "value" : "*" ,
+                                  "children" : [
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    } ,
+                                    {
+                                      "value" : "z" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                } ,
+                                {
+                                  "value" : "-" ,
+                                  "children" : [
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    } ,
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            } ,
+                            {
+                              "value" : "sin" ,
+                              "children" : [
+                                {
+                                  "value" : "/" ,
+                                  "children" : [
+                                    {
+                                      "value" : "x" ,
+                                      "children" : []
+                                    } ,
+                                    {
+                                      "value" : "x" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    } ,
+                    {
+                      "value" : "+" ,
+                      "children" : [
+                        {
+                          "value" : "log" ,
+                          "children" : [
+                            {
+                              "value" : "*" ,
+                              "children" : [
+                                {
+                                  "value" : "z" ,
+                                  "children" : []
+                                } ,
+                                {
+                                  "value" : "sin" ,
+                                  "children" : [
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        } ,
+                        {
+                          "value" : "cos" ,
+                          "children" : [
+                            {
+                              "value" : "+" ,
+                              "children" : [
+                                {
+                                  "value" : "x" ,
+                                  "children" : []
+                                } ,
+                                {
+                                  "value" : "cos" ,
+                                  "children" : [
+                                    {
+                                      "value" : "y" ,
+                                      "children" : []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
