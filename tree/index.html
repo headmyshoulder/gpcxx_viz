@@ -39,9 +39,14 @@
                 /* height : 700px; */
             }
 
+            #tree_container2 {
+                width : 700px;
+                height : 400px;
+            }
+
             #tree2 {
-                heigth : 400px;
-                /* height : 700px; */
+                height : 400px;
+                width : 700px;
             }
 
 
@@ -58,7 +63,7 @@
             <div id="tree_container" class="border">
                 <div id="tree"></div>
             </div>
-            <div class="border">
+            <div id="tree_container2" class="border">
                 <div id="tree2"></div>
             </div>
 
@@ -78,18 +83,12 @@
     <script>
 
     /*
-TODO:
-OK * source out example
-OK * create layout
-OK * reformat
-OK * function for creating a tree
-  OK * parameters - step, element to append, data
-  OK * usage tree( step , "#tree" , horizontal , root );
-  OK * or d3.json( "tree.json" , function( error , root ) { tree( step , "#tree" , horizontal , root ); } );
-OK * make independent of heigth
-* check parameters
-* check css
-*/
+     * TODO:
+     * * Unique interface, use step instead of node_interval + node_height
+     * * Testing css gp_tree_vertical
+     * * Later: make a complete customizable class of the two gp_tree_* functions
+     */
+
     function tree_depth( r )
     {
         var d = 0;
@@ -109,7 +108,7 @@ OK * make independent of heigth
         
         var step = node_height + node_interval ,
             depth = tree_depth( root ) ,
-            height = depth * step - node_height; 
+            height = depth * step - node_interval; 
 
         var tree = d3.layout.tree()
             .size( [ width , 1 ] )
@@ -148,8 +147,8 @@ OK * make independent of heigth
                 d.width = this.getComputedTextLength() + 12;
                 d.rect_width = Math.max( 32 , d.width ); } )
             .attr( "x" , function( d ) { return - d.rect_width / 2 + 6; } )
-            .attr( "y" , 10 )
-            .attr( "dy" , ".32em" )
+            .attr( "y" , node_height/2 )
+            .attr( "dy" , ".2em" )
 
         node.insert( "rect" , "text" )
             .attr( "ry" , 6 )
@@ -162,21 +161,21 @@ OK * make independent of heigth
         return svg
     }
 
-    function gp_tree_vertical( elem , heigth , node_height , node_interval , root )
+    function gp_tree_vertical( elem , height , step , node_height , root )
     {
         
-        var step = node_height + node_interval ,
-            depth = tree_depth( root ) ,
-            height = depth * step - node_height; 
+        var depth = tree_depth( root ) ,
+            width = ( depth ) * step; 
 
         var tree = d3.layout.tree()
-            .size( [ width , 1 ] )
+            .size( [ height ,1 ] )
             .separation( function( a , b ) { return 1; } );
 
         var diagonal = d3.svg.diagonal()
-            .source( function( d ) { return { y: d.source.depth * step + node_height , x: d.source.x }; })
+            .source( function( d ) { return { y: d.source.depth * step + d.source.rect_width , x: d.source.x }; })
             .target( function( d ) { return { y: d.target.depth * step , x: d.target.x }; })
-            .projection( function( d ) { return [ d.x , d.y ]; } );
+            .projection( function( d ) { return [ d.y , d.x ]; } );
+
 
         var svg = d3.select( elem ).append( "svg" )
             .attr( "width" , width )
@@ -188,41 +187,42 @@ OK * make independent of heigth
         var nodes = tree.nodes( root ),
             links = tree.links( nodes );
 
-        var link = svg.selectAll( ".link" )
-              .data( links )
-          .enter().append( "path" )
-              .attr( "class" , "link" )
-              .attr( "d" , diagonal );
-
         var node = svg.selectAll( ".node" )
                 .data( nodes )
             .enter().append( "g" )
                 .attr( "class" , "node" )
-                .attr( "transform" , function( d ) { return "translate(" + d.x + "," + d.depth * step + ")";  } );
+                .attr( "transform" , function( d ) { return "translate(" + d.depth * step + "," + d.x  + ")";  } );
 
         node.append( "text" )
             .text( function( d ) { return d.value; } )
             .each( function( d ) {
                 d.width = this.getComputedTextLength() + 12;
                 d.rect_width = Math.max( 32 , d.width ); } )
-            .attr( "x" , function( d ) { return - d.rect_width / 2 + 6; } )
-            .attr( "y" , 10 )
-            .attr( "dy" , ".32em" )
+            // .attr( "x" , function( d ) { return - d.rect_width / 2 + 6; } )
+            .attr( "x" , function( d ) { return 4; } )
+            .attr( "y" , 3 )
+            .attr( "dx" , ".32em" )
 
         node.insert( "rect" , "text" )
             .attr( "ry" , 6 )
             .attr( "rx" , 6 )
-            .attr( "y" , 0 )
-            .attr( "x" , function( d ) { return -d.rect_width / 2; } )
+            .attr( "y" , - node_height / 2 )
+            .attr( "x" , function( d ) { return 0.0 ; } )
             .attr( "height" , node_height )
             .attr( "width" , function( d ) { return d.rect_width; } );
+
+        var link = svg.selectAll( ".link" )
+              .data( links )
+          .enter().append( "path" )
+              .attr( "class" , "link" )
+              .attr( "d" , diagonal );
 
         return svg
     }
 
     d3.json( "tree.json" , function( error , root ) {
         gp_tree_horizontal( "#tree" , 700 , 20 , 20 , root );
-        gp_tree_vertical( "#tree2" , 700 , 20 , 20 , root );
+        gp_tree_vertical( "#tree2" , 400 , 70 , 20 , root );
     } );
 
     </script>
