@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Visualization of a tree</title>
+        <style>
+
+            .node rect {
+                stroke : none;
+            }
+
+            .border {
+                border : 1px solid rgba( 11,22,33,0.2);
+                stroke-opacity : .2;
+            }
+
+            #tree_container {
+                width : 700px;
+                /* height : 700px; */
+            }
+
+            #tree {
+                width : 700px;
+                /* height : 700px; */
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <main>
+
+            <h1>Visualization of a tree in symbolic regression</h1>
+
+            <div id="tree_container" class="border">
+                <div id="tree"></div>
+            </div>
+
+        </main>
+
+        <footer>
+            <aside>May 9, 2015</aside>
+            <p>Karsten Ahnert</p>
+        </footer>
+
+    </body>
+
+
+    <script type="text/javascript" src="../third_party/d3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../third_party/jquery-2.1.3.min.js" charset="utf-8"></script>
+
+    <script>
+
+    // TODO
+    // make a function of the code below
+    // polish_colored( tree , node_heigth , node_width , color_selector , separator )
+    // draw complete population
+    // blog post
+
+
+    var tree = "*|+|/|*|/|+|y|y|*|0.699935|y|*|-0.204590|0.622236|-|+|/|y|y|/|y|x|+|0.544708|y|/|+|/|y|x|*|y|x|/|+|y|/|x|x|*|*|y|x|+|y|x|*|*|+|/|*|-0.207114|y|y|-|/|0.618881|y|y|+|/|-0.055703|+|y|x|*|x|x|+|/|-|y|y|/|x|-|y|x|+|/|x|*|y|0.149621|+|x|-|-0.457864|x";
+
+
+    function create_nodes( tree )
+    {
+        var nodes_tmp = tree.split( "|" );
+        var nodes = [];
+        for( var i=0 ; i<nodes_tmp.length ; i++ )
+        {
+            node = { "value" : nodes_tmp[i] , "index" : i };
+            nodes.push( node );
+        }
+        return nodes;
+    }
+
+    function color_selector( node )
+    {
+        if( node.value == "+" || node.value == "-" || node.value == "*" || node.value == "/" )
+            return "#f00";
+        if( node.value == "x" )
+            return "#0f0";
+        return "#00f";
+    }
+
+    nodes = create_nodes( tree );
+
+    var num_of_nodes = nodes.length;
+    var box_heigth = 10;
+    var box_width = 10;
+    var sep = 0;
+    var width = box_width * num_of_nodes + sep * ( num_of_nodes - 1 );
+    var height = box_heigth;
+
+    var svg = d3.select( "#tree" ).append( "svg" )
+            .attr( "width" , width )
+            .attr( "height" , height )
+            .append( "g" )
+                .attr( "transform" , "translate(0,0)");
+
+    var node = svg.selectAll( ".node" )
+        .data( nodes )
+        .enter().append( "g" )
+            .attr( "class" , "node" )
+            .attr( "transform" , function( d ) { return "translate(" + d.index * ( box_width + sep ) + ",0)";  } );
+
+    node.insert( "rect" , "text" )
+        .attr( "y" , 0 )
+        .attr( "x" , 0 )
+        .attr( "height" , box_heigth )
+        .attr( "width" , box_width )
+        .style( "fill" , color_selector );
+
+
+
+    </script>
+
+
+
+
+</html>
