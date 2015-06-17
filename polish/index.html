@@ -50,33 +50,42 @@
 
     <script type="text/javascript" src="../third_party/d3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="../third_party/jquery-2.1.3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../third_party/colorbrewer.js" charset="utf-8"></script>
 
     <script>
 
     // TODO
-    // make a function of the code below
-    // polish_colored( tree , node_heigth , node_width , color_selector , separator )
-    // draw complete population
-    // blog post
+    // OK* make a function of the code below
+    //   OK * polish_colored( tree , node_heigth , node_width , color_selector , separator )
+    // * find good colors?
+    // * find good example, maybe pagie2
+    // * draw complete population
+    // * blog post
 
 
     var tree = "*|+|/|*|/|+|y|y|*|0.699935|y|*|-0.204590|0.622236|-|+|/|y|y|/|y|x|+|0.544708|y|/|+|/|y|x|*|y|x|/|+|y|/|x|x|*|*|y|x|+|y|x|*|*|+|/|*|-0.207114|y|y|-|/|0.618881|y|y|+|/|-0.055703|+|y|x|*|x|x|+|/|-|y|y|/|x|-|y|x|+|/|x|*|y|0.149621|+|x|-|-0.457864|x";
 
-
-    function create_nodes( tree )
-    {
-        var nodes_tmp = tree.split( "|" );
-        var nodes = [];
-        for( var i=0 ; i<nodes_tmp.length ; i++ )
-        {
-            node = { "value" : nodes_tmp[i] , "index" : i };
-            nodes.push( node );
-        }
-        return nodes;
-    }
-
     function color_selector( node )
     {
+        var binary_colors = colorbrewer.OrRd[5];
+        var unary_colors = colorbrewer.GnBu[5];
+        var terminal_colors = colorbrewer.PuRd[5];
+        binary_colors.reverse();
+        unary_colors.reverse();
+        terminal_colors.reverse();
+        if( node.value == "+" ) return binary_colors[0];
+        if( node.value == "-" ) return binary_colors[1];
+        if( node.value == "*" ) return binary_colors[2];
+        if( node.value == "-" ) return binary_colors[3];
+        if( node.value == "sin" ) return unary_colors[0];
+        if( node.value == "cos" ) return unary_colors[1];
+        if( node.value == "exp" ) return unary_colors[2];
+        if( node.value == "log" ) return unary_colors[3];
+        if( node.value == "x" ) return terminal_colors[0];
+        if( node.value == "y" ) return terminal_colors[1];
+        if( node.value == "z" ) return terminal_colors[2];
+        return "#000";
+
         if( node.value == "+" || node.value == "-" || node.value == "*" || node.value == "/" )
             return "#f00";
         if( node.value == "x" )
@@ -84,33 +93,49 @@
         return "#00f";
     }
 
-    nodes = create_nodes( tree );
 
-    var num_of_nodes = nodes.length;
-    var box_heigth = 10;
-    var box_width = 10;
-    var sep = 0;
-    var width = box_width * num_of_nodes + sep * ( num_of_nodes - 1 );
-    var height = box_heigth;
+    function polish_colored( elem , tree , node_heigth , node_width , separator , color_selector )
+    {
+        function create_nodes( tree )
+        {
+            var nodes_tmp = tree.split( "|" );
+            var nodes = [];
+            for( var i=0 ; i<nodes_tmp.length ; i++ )
+            {
+                node = { "value" : nodes_tmp[i] , "index" : i };
+                nodes.push( node );
+            }
+            return nodes;
+        }
 
-    var svg = d3.select( "#tree" ).append( "svg" )
-            .attr( "width" , width )
-            .attr( "height" , height )
-            .append( "g" )
-                .attr( "transform" , "translate(0,0)");
+        nodes = create_nodes( tree );
 
-    var node = svg.selectAll( ".node" )
-        .data( nodes )
-        .enter().append( "g" )
-            .attr( "class" , "node" )
-            .attr( "transform" , function( d ) { return "translate(" + d.index * ( box_width + sep ) + ",0)";  } );
+        var num_of_nodes = nodes.length;
+        var width = node_width * num_of_nodes + separator * ( num_of_nodes - 1 );
+        var height = node_heigth;
 
-    node.insert( "rect" , "text" )
-        .attr( "y" , 0 )
-        .attr( "x" , 0 )
-        .attr( "height" , box_heigth )
-        .attr( "width" , box_width )
-        .style( "fill" , color_selector );
+        var svg = d3.select( elem ).append( "svg" )
+                .attr( "width" , width )
+                .attr( "height" , height )
+                .append( "g" )
+                    .attr( "transform" , "translate(0,0)");
+
+        var node = svg.selectAll( ".node" )
+            .data( nodes )
+            .enter().append( "g" )
+                .attr( "class" , "node" )
+                .attr( "transform" , function( d ) { return "translate(" + d.index * ( node_width + separator ) + ",0)";  } );
+
+        node.insert( "rect" , "text" )
+            .attr( "y" , 0 )
+            .attr( "x" , 0 )
+            .attr( "height" , node_heigth )
+            .attr( "width" , node_width )
+            .style( "fill" , color_selector );
+    }
+
+    polish_colored( "#tree" , tree , 10 , 10 , 2 , color_selector );
+
 
 
 
@@ -118,5 +143,5 @@
 
 
 
-
+ 
 </html>
