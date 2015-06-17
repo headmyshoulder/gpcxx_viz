@@ -38,6 +38,11 @@
                 <div id="tree"></div>
             </div>
 
+            <div id="tree_container" class="border">
+                <div id="tree2"></div>
+            </div>
+
+
         </main>
 
         <footer>
@@ -62,21 +67,21 @@
     // * draw complete population
     // * blog post
 
-
-    var tree = "*|+|/|*|/|+|y|y|*|0.699935|y|*|-0.204590|0.622236|-|+|/|y|y|/|y|x|+|0.544708|y|/|+|/|y|x|*|y|x|/|+|y|/|x|x|*|*|y|x|+|y|x|*|*|+|/|*|-0.207114|y|y|-|/|0.618881|y|y|+|/|-0.055703|+|y|x|*|x|x|+|/|-|y|y|/|x|-|y|x|+|/|x|*|y|0.149621|+|x|-|-0.457864|x";
+    var tree = "log|exp|+|/|log|sin|exp|-|-0.566368|x|+|/|sin|/|y|x|cos|x|+|/|*|y|y|cos|y|log|cos|x|-|/|exp|log|/|x|0.262606|sin|+|0.040267|exp|x|cos|+|/|y|+|-0.675963|y|-|y|-|y|-0.532025"
+    // var tree = "*|+|/|*|/|+|y|y|*|0.699935|y|*|-0.204590|0.622236|-|+|/|y|y|/|y|x|+|0.544708|y|/|+|/|y|x|*|y|x|/|+|y|/|x|x|*|*|y|x|+|y|x|*|*|+|/|*|-0.207114|y|y|-|/|0.618881|y|y|+|/|-0.055703|+|y|x|*|x|x|+|/|-|y|y|/|x|-|y|x|+|/|x|*|y|0.149621|+|x|-|-0.457864|x";
 
     function color_selector( node )
     {
-        var binary_colors = colorbrewer.OrRd[5];
-        var unary_colors = colorbrewer.GnBu[5];
-        var terminal_colors = colorbrewer.PuRd[5];
+        var binary_colors = colorbrewer.OrRd[7];
+        var unary_colors = colorbrewer.GnBu[7];
+        var terminal_colors = colorbrewer.PuRd[7];
         binary_colors.reverse();
         unary_colors.reverse();
         terminal_colors.reverse();
         if( node.value == "+" ) return binary_colors[0];
         if( node.value == "-" ) return binary_colors[1];
         if( node.value == "*" ) return binary_colors[2];
-        if( node.value == "-" ) return binary_colors[3];
+        if( node.value == "/" ) return binary_colors[3];
         if( node.value == "sin" ) return unary_colors[0];
         if( node.value == "cos" ) return unary_colors[1];
         if( node.value == "exp" ) return unary_colors[2];
@@ -84,13 +89,8 @@
         if( node.value == "x" ) return terminal_colors[0];
         if( node.value == "y" ) return terminal_colors[1];
         if( node.value == "z" ) return terminal_colors[2];
-        return "#000";
 
-        if( node.value == "+" || node.value == "-" || node.value == "*" || node.value == "/" )
-            return "#f00";
-        if( node.value == "x" )
-            return "#0f0";
-        return "#00f";
+        return "#777";
     }
 
 
@@ -114,12 +114,13 @@
         var width = node_width * num_of_nodes + separator * ( num_of_nodes - 1 );
         var height = node_heigth;
 
-        var svg = d3.select( elem ).append( "svg" )
+        var svg = d3.select( elem );
+/*        var svg = d3.select( elem ).append( "svg" )
                 .attr( "width" , width )
                 .attr( "height" , height )
                 .append( "g" )
                     .attr( "transform" , "translate(0,0)");
-
+*/
         var node = svg.selectAll( ".node" )
             .data( nodes )
             .enter().append( "g" )
@@ -134,7 +135,41 @@
             .style( "fill" , color_selector );
     }
 
-    polish_colored( "#tree" , tree , 10 , 10 , 2 , color_selector );
+    var svg = d3.select( "#tree" ).append( "svg" )
+        .attr( "width" , 1000 )
+        .attr( "height" , 20 )
+        .append( "g" )
+            .attr( "transform" , "translate(0,0)")
+            .attr( "id" , "test_tree" );
+
+    polish_colored( "#test_tree" , tree , 10 , 10 , 2 , color_selector );
+
+
+    var svg2 = d3.select( "#tree2" ).append( "svg" )
+        .attr( "width" , 2000 )
+        .attr( "height" , 1000 )
+        .append( "g" )
+            .attr( "transform" , "translate(0,0)")
+            .attr( "id" , "generation0" );
+
+    d3.json( "full_evolution.json" , function( data ) {
+
+        generation_data = data[0];
+
+        for( var i=0 ; i<generation_data.length ; i++ )
+        {
+            var name = "full_generation" + i;
+            console.log( name );
+            var svg = d3.select( "#generation0" )
+                .append( "g" )
+                    .attr( "transform" , "translate(0," + i * 12 + ")" )
+                    .attr( "id" , name );
+
+            polish_colored( name , generation_data[i].polish , 10 , 10 , 2 , color_selector );
+        }
+    } );
+
+
 
 
 

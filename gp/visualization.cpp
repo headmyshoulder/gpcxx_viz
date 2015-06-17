@@ -9,6 +9,9 @@
  * copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
+#include <symbolic_regression_problems.hpp>
+#include <symbolic_regression_function_sets.hpp>
+
 #include <gpcxx/tree.hpp>
 #include <gpcxx/intrusive_nodes.hpp>
 #include <gpcxx/generate.hpp>
@@ -227,11 +230,8 @@ int main( int argc , char *argv[] )
     using rng_type = std::mt19937;
     rng_type rng;
     
-    auto f = []( double x , double y , double z )
-            { return  1.0 / ( 1.0 + 1.0 / ( x * x * x * x ) ) + 1.0 / ( 1.0 + 1.0 / ( y * y * y * y ) ) + 1.0 / ( 1.0 + 1.0 / ( z * z * z * z ) ); };
-    gpcxx::regression_training_data< double , 3 > c;
-    generate_test_data( c , -5.0 , 5.0 , 0.4 , f );
-    // gpcxx::generate_regression_test_data( c , 1024 , rng , f );
+    
+    auto c = generate_pagie1();
     //]
     
     //[ define_tree_types
@@ -239,42 +239,14 @@ int main( int argc , char *argv[] )
     using node_type = gpcxx::intrusive_named_func_node< double , const context_type > ;
     using tree_type = gpcxx::intrusive_tree< node_type >;
     //]
-    
-    
-    //[ define_terminal_set
-    auto terminal_gen = gpcxx::make_uniform_symbol( std::vector< node_type >{
-        node_type { gpcxx::array_terminal< 0 >{}                                     ,      "x" } ,
-        node_type { gpcxx::array_terminal< 1 >{}                                     ,      "y" } ,
-        node_type { gpcxx::array_terminal< 2 >{}                                     ,      "z" }        
-    } );
-    //]
 
-    //[ define_function_set
-    auto unary_gen = gpcxx::make_uniform_symbol( std::vector< node_type > {
-        node_type { gpcxx::sin_func {}                                               ,      "sin" } ,
-        node_type { gpcxx::cos_func {}                                               ,      "cos" } ,
-        node_type { gpcxx::exp_func {}                                               ,      "exp" } ,
-        node_type { gpcxx::log_func {}                                               ,      "log" }
-    } );
-
-    auto binary_gen = gpcxx::make_uniform_symbol( std::vector< node_type > {
-        node_type { gpcxx::plus_func {}                                              ,      "+" } ,
-        node_type { gpcxx::minus_func {}                                             ,      "-" } ,
-        node_type { gpcxx::multiplies_func {}                                        ,      "*" } ,
-        node_type { gpcxx::divides_func {}                                           ,      "/" }
-    } );
-    //]
-
-    //[ define_node_generator
-    auto node_generator = gpcxx::node_generator< node_type , rng_type , 3 > {
-        { 1.0 , 0 , terminal_gen } ,
-        { 0.5 , 1 , unary_gen } ,
-        { 1.0 , 2 , binary_gen } };
+    //[ define_node_generator and function set
+    auto node_generator = koza_function_set< node_type , rng_type , 2 , true >();
     //]
 
     //[ define_gp_parameters
-    size_t population_size = 256;
-    size_t generation_size = 12;
+    size_t population_size = 1024 / 4 ;
+    size_t generation_size = 50;
     size_t number_elite = 2;
     double mutation_rate = 0.3;
     double crossover_rate = 0.6;
@@ -324,7 +296,7 @@ int main( int argc , char *argv[] )
     //]
 
 
-    //[init_population
+    //[ init_population
     for( size_t i=0 ; i<population.size() ; ++i )
     {
         tree_generator( population[i] );
@@ -333,6 +305,9 @@ int main( int argc , char *argv[] )
     
     std::ofstream json_out( "example_tree.json" );
     json_out << gpcxx::json( population[0] ) << std::endl;
+    
+    std::ofstream evo_out { "full_evolution.json" };
+    evo_out << "[" << gpcxx::population_json( population , fitness , 1 , "\n" , false );
     
     std::cout << "Best individuals" << std::endl << gpcxx::best_individuals( population , fitness ) << std::endl;
     std::cout << "Statistics : " << gpcxx::calc_population_statistics( population ) << std::endl;
@@ -354,10 +329,13 @@ int main( int argc , char *argv[] )
         std::cout << "Iteration " << i << std::endl;
         std::cout << "Best individuals" << std::endl << gpcxx::best_individuals( population , fitness , 1 ) << std::endl;
         std::cout << "Statistics : " << gpcxx::calc_population_statistics( population ) << std::endl << std::endl;
+        
+        evo_out << " , " << "\n" << gpcxx::population_json( population , fitness , 1 , "\n" , false );
     }
+    evo_out << "]" << "\n";
     //]
     
-    std::ofstream fout( "evolution.dat" );
+    std::ofstream fout( "evolution.json" );
     obs.write( fout );
 
     return 0;

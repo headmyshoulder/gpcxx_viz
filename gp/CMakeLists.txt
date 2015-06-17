@@ -18,6 +18,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14" )        ## Optimize
 
 include_directories ( ${Boost_INCLUDE_DIRS} )
 include_directories ( ../third_party/gpcxx/include )
+include_directories ( ../third_party/gpcxx/performance/benchmarks )
 
 add_executable ( visualization visualization.cpp )
 
