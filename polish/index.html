@@ -154,18 +154,20 @@
 
     d3.json( "full_evolution.json" , function( data ) {
 
-        generation_data = data[0];
+        generation_data = data[20];
+        generation_data.sort( function( d1 , d2 ) { return d1.fitness > d2.fitness; } );
 
         for( var i=0 ; i<generation_data.length ; i++ )
         {
             var name = "full_generation" + i;
             console.log( name );
-            var svg = d3.select( "#generation0" )
+            
+            d3.select( "#generation0" )
                 .append( "g" )
-                    .attr( "transform" , "translate(0," + i * 12 + ")" )
+                    .attr( "transform" , "translate(0," + i * 6 + ")" )
                     .attr( "id" , name );
 
-            polish_colored( name , generation_data[i].polish , 10 , 10 , 2 , color_selector );
+            polish_colored( "#" + name , generation_data[i].polish , 6 , 3 , 0 , color_selector );
         }
     } );
 

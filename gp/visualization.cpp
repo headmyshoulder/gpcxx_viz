@@ -245,7 +245,7 @@ int main( int argc , char *argv[] )
     //]
 
     //[ define_gp_parameters
-    size_t population_size = 1024 / 4 ;
+    size_t population_size = 128;
     size_t generation_size = 50;
     size_t number_elite = 2;
     double mutation_rate = 0.3;
